@@ -17,4 +17,15 @@ interface IRoninCats is IERC721Enumerable{
      */
     function getLastClaimStamp(uint _tokenId) external view returns(uint);
 
+    /**
+     * @dev Resets number of days worth of unclaimed HONOUR tokens
+     * Note: msg.sender must be the HonourToken contract
+     */
+    function resetResidualDays(address _address) external;
+
+    /**
+     * @dev View number of days worth of unclaimed HONOUR tokens
+     */
+    function getResidualDays(address _address) external view returns(uint);
+
 }

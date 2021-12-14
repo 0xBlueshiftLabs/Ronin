@@ -36,14 +36,14 @@ contract HonourToken is ERC20, Ownable {
   uint deploymentTimeStamp;
 
   constructor(
-    address _RoninKittensAddres, 
-    address _RoninCatsAddress
+    address _RoninCatsAddress,
+    address _RoninKittensAddres
     ) 
     
     ERC20("Honour", "HONOUR") {
 
-      roninKittens = IRoninKittens(_RoninKittensAddres);
       roninCats = IRoninCats(_RoninCatsAddress);
+      roninKittens = IRoninKittens(_RoninKittensAddres);
 
       deploymentTimeStamp = block.timestamp;
   }
@@ -52,7 +52,7 @@ contract HonourToken is ERC20, Ownable {
 
   // PUBLIC 
   function claimReward() public {
-
+    
     require(roninCats.balanceOf(msg.sender) > 0 || roninCats.getResidualDays(msg.sender) > 0, "No rewards to claim");
     require(block.timestamp <= deploymentTimeStamp + (24*60*60*365.25*10)); // 10 year limit
 

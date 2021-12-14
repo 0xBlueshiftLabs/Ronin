@@ -2,7 +2,7 @@
 
 # TO DO
 
-overide transfer functions to update rewards etc
+Unit testing
 
 
 

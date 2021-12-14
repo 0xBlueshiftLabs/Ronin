@@ -46,7 +46,7 @@ contract RoninCats is ERC721Enumerable, Ownable {
 
   mapping(uint => uint) lastClaimStamp; // tokenId => timestamp.
 
-  mapping(address => uint) residualDays; // address => number of days worth of unclaimed HONOUR due to token transfer
+  mapping(address => uint) residualDays; // address => number of days worth of unclaimed HONOUR due to ERC721 token transfer
 
 
   // public
@@ -107,13 +107,13 @@ contract RoninCats is ERC721Enumerable, Ownable {
 
 
 function transferFrom(address from, address to, uint256 tokenId) public override {
-    residualDays[from] = ((block.timestamp - getLastClaimStamp(tokenId)) / (24*60*60));
+    residualDays[from] = ((block.timestamp - lastClaimStamp[tokenId])) / (24*60*60);
     lastClaimStamp[tokenId] = block.timestamp;
 		ERC721.transferFrom(from, to, tokenId);
 	}
 
 	function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
-		residualDays[from] = ((block.timestamp - getLastClaimStamp(tokenId)) / (24*60*60));
+		residualDays[from] = ((block.timestamp - lastClaimStamp[tokenId])) / (24*60*60);
     lastClaimStamp[tokenId] = block.timestamp;
 		ERC721.safeTransferFrom(from, to, tokenId, _data);
 	}
