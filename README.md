@@ -1,5 +1,10 @@
 
 
+# TO DO
+
+overide transfer functions to update rewards etc
+
+
 
 
 
@@ -15,11 +20,6 @@
 - Only 500 total circulating supply of “Ronin Kittens”
 
 
-### Renaming
-
-- Burn 10 $HONOUR
-- Must be holding 1 ronin Cat NFT
-- Change the name of your Ronin Cat NFT
 
 
 // QUESTIONS //
@@ -27,5 +27,9 @@
 10 HONOUR per day, or 70 HONOUR per week? I.e. can people claim daily or weekly?
 
 Do you want unclaimed HONOUR to be lost upon RoninCat NFT transfer, or does the new HONOUR inherit the unclaimed reward?
+Kongz contract lets user keep unclaimed reward. I say we just pay out thier reward upon transfer because easier to implement.
+
+
+10 year limit on HONOUR rewards claims from time of contract deployment, ok?
 
 

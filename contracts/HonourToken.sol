@@ -33,6 +33,8 @@ contract HonourToken is ERC20, Ownable {
   IRoninKittens roninKittens;
   IRoninCats roninCats;
 
+  uint deploymentTimeStamp;
+
   constructor(
     address _RoninKittensAddres, 
     address _RoninCatsAddress
@@ -42,6 +44,8 @@ contract HonourToken is ERC20, Ownable {
 
       roninKittens = IRoninKittens(_RoninKittensAddres);
       roninCats = IRoninCats(_RoninCatsAddress);
+
+      deploymentTimeStamp = block.timestamp;
   }
 
 
@@ -49,13 +53,22 @@ contract HonourToken is ERC20, Ownable {
   // PUBLIC 
   function claimReward() public {
 
-    require(roninCats.balanceOf(msg.sender) > 0, "You don't own any tokens");
+    require(roninCats.balanceOf(msg.sender) > 0 || roninCats.getResidualDays(msg.sender) > 0, "No rewards to claim");
+    require(block.timestamp <= deploymentTimeStamp + (24*60*60*365.25*10)); // 10 year limit
 
     uint reward;
-    for (uint i = 0; i < roninCats.balanceOf(msg.sender); i++) {
-      uint tokenId = roninCats.tokenOfOwnerByIndex(msg.sender, i);
-      reward += getReward(tokenId);
-      roninCats.setLastClaimStamp(tokenId);
+
+    if (roninCats.balanceOf(msg.sender) > 0) {
+      for (uint i = 0; i < roninCats.balanceOf(msg.sender); i++) {
+        uint tokenId = roninCats.tokenOfOwnerByIndex(msg.sender, i);
+        reward += getReward(tokenId);
+        roninCats.setLastClaimStamp(tokenId);
+      }
+    }
+    
+    if (roninCats.getResidualDays(msg.sender) > 0) {
+      reward += roninCats.getResidualDays(msg.sender) * dailyReward;
+      roninCats.resetResidualDays(msg.sender);
     }
   
     _mint(msg.sender, reward);
@@ -69,27 +82,30 @@ contract HonourToken is ERC20, Ownable {
   function breed() public {
     require(breedingStatus, "Breeding is not live");
     require(balanceOf(msg.sender) >= breedingCost, "Insufficient HONOUR to breed");
-    require(roninCats.balanceOf(msg.sender) >= 2, "Must own at least 2 ");
+    require(roninCats.balanceOf(msg.sender) >= 2, "Must own at least 2 RoninCats");
 
-    // burn msg.sender's breedCost amount of tokens
+    _burn(msg.sender, breedingCost);
 
     address breeder = msg.sender;
-    //roninKittens.mint(breeder)
+    roninKittens.mint(breeder);
   }
 
 
   
-
+  // ONLY OWNER //
 
   function setBreedingStatus(bool _live) public onlyOwner {
     breedingStatus = _live;
   }
 
+  // unit = Wei.
   function setBreedingCost(uint _cost) public onlyOwner {
     breedingCost = _cost;
   }
 
+  // unit = Wei.
   function setDailyReward(uint _dailyReward) public onlyOwner {
     dailyReward = _dailyReward;
   }
+  
 }

@@ -38,10 +38,15 @@ contract RoninCats is ERC721Enumerable, Ownable {
     setNotRevealedURI(_initNotRevealedUri);
   }
 
+  // EVENTS //
+
+  event TokenMinted(uint tokenId);
 
   // MAPPINGS //
 
-  mapping(uint => uint) lastClaimStamp; // tokenId => timestamp. set to block.timestamp upon minting and transfer.
+  mapping(uint => uint) lastClaimStamp; // tokenId => timestamp.
+
+  mapping(address => uint) residualDays; // address => number of days worth of unclaimed HONOUR due to token transfer
 
 
   // public
@@ -59,6 +64,7 @@ contract RoninCats is ERC721Enumerable, Ownable {
     for (uint256 i = 1; i <= _mintAmount; i++) {
       uint tokenId = totalSupply() + 1;
       _safeMint(msg.sender, tokenId);
+      emit TokenMinted(tokenId);
       lastClaimStamp[tokenId] = block.timestamp;
     }
   }
@@ -68,11 +74,19 @@ contract RoninCats is ERC721Enumerable, Ownable {
     lastClaimStamp[_tokenId] = block.timestamp;
   }
 
+  function resetResidualDays(address _address) external {
+    require(msg.sender == honourToken, "Function only callable by HonourToken contract");
+    residualDays[_address] = 0;
+  }
+
   
   function getLastClaimStamp(uint _tokenId) external view returns(uint) {
     return lastClaimStamp[_tokenId];
   }
   
+  function getResidualDays(address _address) external view returns(uint) {
+    return residualDays[_address];
+  }
 
   function walletOfOwner(address _owner)
     public
@@ -86,6 +100,29 @@ contract RoninCats is ERC721Enumerable, Ownable {
     }
     return tokenIds;
   }
+
+
+
+  
+
+
+function transferFrom(address from, address to, uint256 tokenId) public override {
+    residualDays[from] = ((block.timestamp - getLastClaimStamp(tokenId)) / (24*60*60));
+    lastClaimStamp[tokenId] = block.timestamp;
+		ERC721.transferFrom(from, to, tokenId);
+	}
+
+	function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
+		residualDays[from] = ((block.timestamp - getLastClaimStamp(tokenId)) / (24*60*60));
+    lastClaimStamp[tokenId] = block.timestamp;
+		ERC721.safeTransferFrom(from, to, tokenId, _data);
+	}
+
+
+
+
+
+
 
   function tokenURI(uint256 tokenId)
     public
