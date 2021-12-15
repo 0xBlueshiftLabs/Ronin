@@ -27,7 +27,7 @@ contract HonourToken is ERC20, Ownable {
 
   uint public dailyReward = 10 ether;
 
-  uint public breedingCost = 200 ether;
+  uint public breedingCost = 600 ether;
 
   IRoninKittens roninKittens;
   IRoninCats roninCats;

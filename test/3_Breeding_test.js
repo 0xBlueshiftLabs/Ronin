@@ -53,7 +53,7 @@ contract("RoninCats", async accounts => {
        
     });
 
-    it('Can breed if you own 2 or more RoninCats and have 200 $HONOUR to burn', async () => { 
+    it('Can breed if you own 2 or more RoninCats and have 600 $HONOUR to burn', async () => { 
 
         // initial values
         expect(await honourToken.balanceOf(accounts[0])).to.be.a.bignumber.equal(new BN(0));
@@ -84,14 +84,14 @@ contract("RoninCats", async accounts => {
 
         // increases timestamp by 20 days
         currentTimeStamp = (await web3.eth.getBlock('latest')).timestamp;
-        const moveToDate = currentTimeStamp + duration.days(20);
+        const moveToDate = currentTimeStamp + duration.days(60);
         await increaseTimeTo(moveToDate);
 
-        // breeder claims 200 $HONOUR
+        // breeder claims 600 $HONOUR
         expect(await honourToken.balanceOf(accounts[0])).to.be.a.bignumber.equal(new BN(0)); 
         await honourToken.claimReward();
-        expect(await honourToken.totalSupply()).to.be.a.bignumber.equal(new BN(web3.utils.toWei('200', 'ether')));
-        expect(await honourToken.balanceOf(accounts[0])).to.be.a.bignumber.equal(new BN(web3.utils.toWei('200', 'ether'))); 
+        expect(await honourToken.totalSupply()).to.be.a.bignumber.equal(new BN(web3.utils.toWei('600', 'ether')));
+        expect(await honourToken.balanceOf(accounts[0])).to.be.a.bignumber.equal(new BN(web3.utils.toWei('600', 'ether'))); 
         expect(await honourToken.viewReward(accounts[0])).to.be.a.bignumber.equal(new BN(0));
 
         // Doesn't own 2 or more RoninCats
