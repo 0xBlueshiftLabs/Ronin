@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-contract RoninKittens is ERC721Enumerable, Ownable {
+contract RoninRecruits is ERC721Enumerable, Ownable {
 
   using Strings for uint256;
 

@@ -5,10 +5,10 @@
 const HonourToken = artifacts.require("HonourToken");
 
 const IRoninCats = artifacts.require("IRoninCats");
-const IRoninKittens = artifacts.require("IRoninKittens");
+const IRoninRecruits = artifacts.require("IRoninRecruits");
 
 const RoninCats = artifacts.require("RoninCats");
-const RoninKittens = artifacts.require("RoninKittens");
+const RoninRecruits = artifacts.require("RoninRecruits");
 
 
 var chai = require("./setupchai.js");
@@ -25,18 +25,18 @@ const { duration, increaseTimeTo, latestTime } = require('./utils');
 contract("RoninCats", async accounts => {
 
     let roninCats;
-    let roninKittens;
+    let roninRecruits;
     let honourToken;
   
     beforeEach(async () => {
         
         roninCats = await RoninCats.deployed();
-        roninKittens = await RoninKittens.deployed();
+        roninRecruits = await RoninRecruits.deployed();
 
         honourToken = await HonourToken.deployed();
 
         await roninCats.setHonourTokenAddress(honourToken.address);
-        await roninKittens.setHonourTokenAddress(honourToken.address);
+        await roninRecruits.setHonourTokenAddress(honourToken.address);
 
 
     });
@@ -46,10 +46,10 @@ contract("RoninCats", async accounts => {
     it('Default values', async () => { 
 
         expect(await roninCats.totalSupply()).to.be.a.bignumber.equal(new BN(0));
-        expect(await roninKittens.totalSupply()).to.be.a.bignumber.equal(new BN(0));
+        expect(await roninRecruits.totalSupply()).to.be.a.bignumber.equal(new BN(0));
   
         expect(await roninCats.honourToken()).to.equal(honourToken.address);
-        expect(await roninKittens.honourToken()).to.equal(honourToken.address);
+        expect(await roninRecruits.honourToken()).to.equal(honourToken.address);
        
     });
 
@@ -58,7 +58,7 @@ contract("RoninCats", async accounts => {
         // initial values
         expect(await honourToken.balanceOf(accounts[0])).to.be.a.bignumber.equal(new BN(0));
         expect(await honourToken.totalSupply()).to.be.a.bignumber.equal(new BN(0));
-        expect(await roninKittens.breedingStatus()).to.be.equal(false);
+        expect(await roninRecruits.breedingStatus()).to.be.equal(false);
 
         // Breeding not live
         await truffleAssert.reverts(
@@ -66,8 +66,8 @@ contract("RoninCats", async accounts => {
             "Breeding is not live"
         );
 
-        await roninKittens.setBreedingStatus(true);
-        expect(await roninKittens.breedingStatus()).to.be.equal(true);
+        await roninRecruits.setBreedingStatus(true);
+        expect(await roninRecruits.breedingStatus()).to.be.equal(true);
 
         // Doesn't own enough HONOUR tokens
         await truffleAssert.reverts(
@@ -112,8 +112,8 @@ contract("RoninCats", async accounts => {
         expect(await honourToken.balanceOf(accounts[0])).to.be.a.bignumber.equal(new BN(web3.utils.toWei('0', 'ether')));
 
         // checks RoninKitten was minted to breeder
-        expect(await roninKittens.totalSupply()).to.be.a.bignumber.equal(new BN(1));
-        expect(await roninKittens.balanceOf(accounts[0])).to.be.a.bignumber.equal(new BN(1));
+        expect(await roninRecruits.totalSupply()).to.be.a.bignumber.equal(new BN(1));
+        expect(await roninRecruits.balanceOf(accounts[0])).to.be.a.bignumber.equal(new BN(1));
         
        
     });

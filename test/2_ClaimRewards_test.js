@@ -5,10 +5,10 @@
 const HonourToken = artifacts.require("HonourToken");
 
 const IRoninCats = artifacts.require("IRoninCats");
-const IRoninKittens = artifacts.require("IRoninKittens");
+const IRoninRecruits = artifacts.require("IRoninRecruits");
 
 const RoninCats = artifacts.require("RoninCats");
-const RoninKittens = artifacts.require("RoninKittens");
+const RoninRecruits = artifacts.require("RoninRecruits");
 
 
 var chai = require("./setupchai.js");
@@ -25,18 +25,18 @@ const { duration, increaseTimeTo, latestTime } = require('./utils');
 contract("RoninCats", async accounts => {
 
     let roninCats;
-    let roninKittens;
+    let roninRecruits;
     let honourToken;
   
     beforeEach(async () => {
         
         roninCats = await RoninCats.deployed();
-        roninKittens = await RoninKittens.deployed();
+        roninRecruits = await RoninRecruits.deployed();
 
         honourToken = await HonourToken.deployed();
 
         await roninCats.setHonourTokenAddress(honourToken.address);
-        await roninKittens.setHonourTokenAddress(honourToken.address);
+        await roninRecruits.setHonourTokenAddress(honourToken.address);
 
 
     });
@@ -46,7 +46,7 @@ contract("RoninCats", async accounts => {
         expect(await roninCats.totalSupply()).to.be.a.bignumber.equal(new BN(0));
   
         expect(await roninCats.honourToken()).to.equal(honourToken.address);
-        expect(await roninKittens.honourToken()).to.equal(honourToken.address);
+        expect(await roninRecruits.honourToken()).to.equal(honourToken.address);
        
     });
 

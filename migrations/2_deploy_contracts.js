@@ -2,10 +2,10 @@
 const HonourToken = artifacts.require("HonourToken");
 
 const IRoninCats = artifacts.require("IRoninCats");
-const IRoninKittens = artifacts.require("IRoninKittens");
+const IRoninRecruits = artifacts.require("IRoninRecruits");
 
 const RoninCats = artifacts.require("RoninCats");
-const RoninKittens = artifacts.require("RoninKittens");
+const RoninRecruits = artifacts.require("RoninRecruits");
 
 
 
@@ -20,16 +20,16 @@ module.exports = async (deployer) => {
     );
 
     await deployer.deploy(
-        RoninKittens,
-        "RoninKittens",
-        "RKITS",
+        RoninRecruits,
+        "RoninRecruits",
+        "RCRT",
         "baseURI"
     );
 
     await deployer.deploy(
         HonourToken, 
         RoninCats.address, 
-        RoninKittens.address
+        RoninRecruits.address
     );
 
 

@@ -13,9 +13,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @dev RoninKittens interface. Inherits from IERC721Enumerable.
+ * @dev roninRecruits interface. Inherits from IERC721Enumerable.
  */
-import "./IRoninKittens.sol";
+import "./IroninRecruits.sol";
 
 /**
  * @dev RoninCats interface. Inherits from IERC721Enumerable.
@@ -29,20 +29,20 @@ contract HonourToken is ERC20, Ownable {
 
   uint public breedingCost = 600 ether;
 
-  IRoninKittens roninKittens;
+  IRoninRecruits roninRecruits;
   IRoninCats roninCats;
 
   uint deploymentTimeStamp;
 
   constructor(
     address _RoninCatsAddress,
-    address _RoninKittensAddres
+    address _roninRecruitsAddres
     ) 
     
     ERC20("Honour", "HONOUR") {
 
       roninCats = IRoninCats(_RoninCatsAddress);
-      roninKittens = IRoninKittens(_RoninKittensAddres);
+      roninRecruits = IRoninRecruits(_roninRecruitsAddres);
 
       deploymentTimeStamp = block.timestamp;
   }
@@ -99,14 +99,14 @@ contract HonourToken is ERC20, Ownable {
   }
 
   function breed() public {
-    require(roninKittens.breedingStatus(), "Breeding is not live");
+    require(roninRecruits.breedingStatus(), "Breeding is not live");
     require(balanceOf(msg.sender) >= breedingCost, "Insufficient $HONOUR tokens to breed");
     require(roninCats.balanceOf(msg.sender) >= 2, "Must own at least 2 RoninCats");
 
     _burn(msg.sender, breedingCost);
 
     address breeder = msg.sender;
-    roninKittens.mint(breeder);
+    roninRecruits.mint(breeder);
   }
 
 
