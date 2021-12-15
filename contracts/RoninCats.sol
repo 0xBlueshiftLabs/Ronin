@@ -22,11 +22,13 @@ contract RoninCats is ERC721Enumerable, Ownable {
   uint256 public cost = 0.05 ether;
   uint256 public maxSupply = 1000;
   uint256 public maxMintAmount = 2;
-  bool public paused = true;
   bool public revealed = false;
   string public notRevealedUri;
 
-  address honourToken;
+  bool public preSaleStatus;
+  bool public publicSaleStatus;
+
+  address public honourToken;
 
   constructor(
     string memory _name,
@@ -42,7 +44,10 @@ contract RoninCats is ERC721Enumerable, Ownable {
 
   event TokenMinted(uint tokenId);
 
+
   // MAPPINGS //
+
+  mapping(address => bool) whitelist;
 
   mapping(uint => uint) lastClaimStamp; // tokenId => timestamp.
 
@@ -52,16 +57,21 @@ contract RoninCats is ERC721Enumerable, Ownable {
   // public
   function mint(uint256 _mintAmount) public payable {
    
-    require(!paused);
-    require(_mintAmount > 0);
-    require(_mintAmount <= maxMintAmount);
-    require(totalSupply() + _mintAmount <= maxSupply);
+    require(preSaleStatus || publicSaleStatus, "Minting not live");
+    require(_mintAmount > 0 && _mintAmount <= maxMintAmount, "Incorrect mint amount");
+    require(totalSupply() + _mintAmount <= maxSupply, "Minting that many would exceed max supply");
 
     if (msg.sender != owner()) {
       require(msg.value >= cost * _mintAmount);
     }
 
-    for (uint256 i = 1; i <= _mintAmount; i++) {
+    if (preSaleStatus) {
+      if (msg.sender != owner()) {
+        require(whitelist[msg.sender], "Not on whitelist");
+      }
+    }
+
+    for (uint256 i = 0; i < _mintAmount; i++) {
       uint tokenId = totalSupply() + 1;
       _safeMint(msg.sender, tokenId);
       emit TokenMinted(tokenId);
@@ -106,17 +116,25 @@ contract RoninCats is ERC721Enumerable, Ownable {
   
 
 
-function transferFrom(address from, address to, uint256 tokenId) public override {
+  function transferFrom(address from, address to, uint256 tokenId) public override {
+    updateRewards(from, tokenId);
+    ERC721.transferFrom(from, to, tokenId);
+  }
+
+  function safeTransferFrom(address from, address to, uint256 tokenId) public override {
+    updateRewards(from, tokenId);
+    ERC721.transferFrom(from, to, tokenId);
+  }
+
+  function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
+    updateRewards(from, tokenId);
+    ERC721.safeTransferFrom(from, to, tokenId, _data);
+  }
+
+  function updateRewards(address from, uint256 tokenId) internal {
     residualDays[from] = ((block.timestamp - lastClaimStamp[tokenId])) / (24*60*60);
     lastClaimStamp[tokenId] = block.timestamp;
-		ERC721.transferFrom(from, to, tokenId);
-	}
-
-	function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
-		residualDays[from] = ((block.timestamp - lastClaimStamp[tokenId])) / (24*60*60);
-    lastClaimStamp[tokenId] = block.timestamp;
-		ERC721.safeTransferFrom(from, to, tokenId, _data);
-	}
+  }
 
 
 
@@ -176,8 +194,14 @@ function transferFrom(address from, address to, uint256 tokenId) public override
     baseExtension = _newBaseExtension;
   }
 
-  function pause(bool _state) public onlyOwner {
-    paused = _state;
+  function setPreSaleStatus(bool _state) public onlyOwner {
+    publicSaleStatus = false;
+    preSaleStatus = _state;
+  }
+
+  function setPublicSaleStatus(bool _state) public onlyOwner {
+    preSaleStatus = false;
+    publicSaleStatus = _state;
   }
  
   function withdraw() public payable onlyOwner {
@@ -187,5 +211,15 @@ function transferFrom(address from, address to, uint256 tokenId) public override
 
   function setHonourTokenAddress(address _address) public onlyOwner {
     honourToken = _address;
+  }
+
+  /**
+    * @dev Add addresses to whitelist, giving access to the pre sale
+    * @param _addresses - array of address' that tokens will be sent to ["address","address",...]
+    */
+  function whitelistAddresses(address[] calldata _addresses) external onlyOwner {
+    for (uint i=0; i<_addresses.length; i++) {
+        whitelist[_addresses[i]] = true; 
+    }
   }
 }

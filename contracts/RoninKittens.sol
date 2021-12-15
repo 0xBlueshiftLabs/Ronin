@@ -21,7 +21,9 @@ contract RoninKittens is ERC721Enumerable, Ownable {
   string public baseExtension = ".json";
   uint256 public maxSupply = 500;
 
-  address honourToken;
+  bool public breedingStatus;
+
+  address public honourToken;
 
   constructor(
     string memory _name,
@@ -41,6 +43,7 @@ contract RoninKittens is ERC721Enumerable, Ownable {
       "Function only callable by HonourToken contract."
     );
 
+    require(breedingStatus, "Breeding is not live");
     require(totalSupply() + 1 <= maxSupply, "Max supply reached");
 
     uint tokenId = totalSupply() + 1;
@@ -83,5 +86,9 @@ contract RoninKittens is ERC721Enumerable, Ownable {
 
   function setHonourTokenAddress(address _address) public onlyOwner {
     honourToken = _address;
+  }
+
+  function setBreedingStatus(bool _live) public onlyOwner {
+    breedingStatus = _live;
   }
 }

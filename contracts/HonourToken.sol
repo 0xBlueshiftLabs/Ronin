@@ -25,10 +25,9 @@ import "./IRoninCats.sol";
 
 contract HonourToken is ERC20, Ownable {
 
-  uint dailyReward = 10 ether;
+  uint public dailyReward = 10 ether;
 
-  bool breedingStatus;
-  uint breedingCost = 200 ether;
+  uint public breedingCost = 200 ether;
 
   IRoninKittens roninKittens;
   IRoninCats roninCats;
@@ -56,32 +55,52 @@ contract HonourToken is ERC20, Ownable {
     require(roninCats.balanceOf(msg.sender) > 0 || roninCats.getResidualDays(msg.sender) > 0, "No rewards to claim");
     require(block.timestamp <= deploymentTimeStamp + (24*60*60*365.25*10)); // 10 year limit
 
-    uint reward;
-
-    if (roninCats.balanceOf(msg.sender) > 0) {
-      for (uint i = 0; i < roninCats.balanceOf(msg.sender); i++) {
-        uint tokenId = roninCats.tokenOfOwnerByIndex(msg.sender, i);
-        reward += getReward(tokenId);
-        roninCats.setLastClaimStamp(tokenId);
-      }
-    }
-    
-    if (roninCats.getResidualDays(msg.sender) > 0) {
-      reward += roninCats.getResidualDays(msg.sender) * dailyReward;
-      roninCats.resetResidualDays(msg.sender);
-    }
+    uint reward = _getReward(msg.sender);
   
     _mint(msg.sender, reward);
   }
 
-  function getReward(uint _tokenId) public view returns(uint) {
-    uint reward = ((block.timestamp - roninCats.getLastClaimStamp(_tokenId)) / (24*60*60)) * dailyReward;
+  function _getReward(address _address) internal returns(uint) {
+
+    uint reward;
+
+    if (roninCats.balanceOf(_address) > 0) {
+      for (uint i = 0; i < roninCats.balanceOf(_address); i++) {
+        uint tokenId = roninCats.tokenOfOwnerByIndex(_address, i);
+        reward += ((block.timestamp - roninCats.getLastClaimStamp(tokenId)) / (24*60*60)) * dailyReward;
+        roninCats.setLastClaimStamp(tokenId);
+      }
+    }
+    
+    if (roninCats.getResidualDays(_address) > 0) {
+      reward += roninCats.getResidualDays(_address) * dailyReward;
+      roninCats.resetResidualDays(_address);
+    }
+
+    return reward;
+  }
+
+  function viewReward(address _address) public view returns(uint) {
+
+    uint reward;
+
+    if (roninCats.balanceOf(_address) > 0) {
+      for (uint i = 0; i < roninCats.balanceOf(_address); i++) {
+        uint tokenId = roninCats.tokenOfOwnerByIndex(_address, i);
+        reward += ((block.timestamp - roninCats.getLastClaimStamp(tokenId)) / (24*60*60)) * dailyReward;
+      }
+    }
+    
+    if (roninCats.getResidualDays(_address) > 0) {
+      reward += roninCats.getResidualDays(_address) * dailyReward;
+    }
+
     return reward;
   }
 
   function breed() public {
-    require(breedingStatus, "Breeding is not live");
-    require(balanceOf(msg.sender) >= breedingCost, "Insufficient HONOUR to breed");
+    require(roninKittens.breedingStatus(), "Breeding is not live");
+    require(balanceOf(msg.sender) >= breedingCost, "Insufficient $HONOUR tokens to breed");
     require(roninCats.balanceOf(msg.sender) >= 2, "Must own at least 2 RoninCats");
 
     _burn(msg.sender, breedingCost);
@@ -94,9 +113,6 @@ contract HonourToken is ERC20, Ownable {
   
   // ONLY OWNER //
 
-  function setBreedingStatus(bool _live) public onlyOwner {
-    breedingStatus = _live;
-  }
 
   // unit = Wei.
   function setBreedingCost(uint _cost) public onlyOwner {

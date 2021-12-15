@@ -42,13 +42,78 @@ contract("RoninCats", async accounts => {
 
 
     
-    it('Can harvest tokens', async () => { 
+    it('Default values', async () => { 
 
+      expect(await roninCats.totalSupply()).to.be.a.bignumber.equal(new BN(0));
 
-        expect(await roninCats.balanceOf(accounts[0])).to.be.a.bignumber.equal(new BN(0)); 
-
+      expect(await roninCats.honourToken()).to.equal(honourToken.address);
+      expect(await roninKittens.honourToken()).to.equal(honourToken.address);
      
     });
+
+
+    it('white listed address can mint during presale', async () => {
+
+
+        expect(await roninCats.preSaleStatus()).to.eq(false)
+        expect(await roninCats.publicSaleStatus()).to.eq(false)
+    
+        await roninCats.setPreSaleStatus(true)
+        expect(await roninCats.preSaleStatus()).to.eq(true)
+    
+        await roninCats.whitelistAddresses([accounts[3], accounts[4]])
+    
+        // not on whitelist
+        await truffleAssert.reverts(
+          roninCats.mint(1, { value: 0.05e18, from: accounts[7] }),
+          "Not on whitelist"
+        );
+    
+        expect(await roninCats.totalSupply()).to.be.a.bignumber.equal(new BN(0))
+    
+        await roninCats.mint(2, { value: 0.1e18, from: accounts[3] })
+        expect(await roninCats.totalSupply()).to.be.a.bignumber.equal(new BN(2))
+        expect(await roninCats.balanceOf(accounts[3])).to.be.a.bignumber.equal(new BN(2))
+    
+    
+    
+        // maximum of 3 mints
+        await truffleAssert.reverts(
+          roninCats.mint(3, { value: 0.15e18, from: accounts[4] }),
+          "Incorrect mint amount"
+        );
+    
+      })
+    
+      it('set public sale live whilst stopping pre sale', async () => {
+    
+        expect(await roninCats.preSaleStatus()).to.eq(true)
+        expect(await roninCats.publicSaleStatus()).to.eq(false)
+    
+        await roninCats.setPublicSaleStatus(true)       
+    
+        expect(await roninCats.preSaleStatus()).to.eq(false)
+        expect(await roninCats.publicSaleStatus()).to.eq(true)
+    
+      })
+
+      it('Can mint at public sale', async () => { 
+
+        expect(await roninCats.publicSaleStatus()).to.eq(true)
+        
+        await roninCats.mint(2, { value: 0.1e18, from: accounts[8] })
+        expect(await roninCats.totalSupply()).to.be.a.bignumber.equal(new BN(4))
+        expect(await roninCats.balanceOf(accounts[8])).to.be.a.bignumber.equal(new BN(2))
+    
+    
+    
+        // maximum of 3 mints at pre sale
+        await truffleAssert.reverts(
+          roninCats.mint(3, { value: 0.15e18, from: accounts[4] }),
+          "Incorrect mint amount"
+        );
+       
+      });
 
     
 })

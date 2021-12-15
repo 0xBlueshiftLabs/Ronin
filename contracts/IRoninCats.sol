@@ -28,4 +28,6 @@ interface IRoninCats is IERC721Enumerable{
      */
     function getResidualDays(address _address) external view returns(uint);
 
+    function honourToken() external view returns(address);
+
 }

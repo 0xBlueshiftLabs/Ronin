@@ -6,6 +6,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 interface IRoninKittens is IERC721Enumerable{
 
     function mint(address _to) external;
+
+    function honourToken() external view returns(address);
+
+    function breedingStatus() external view returns(bool);
   
 }
 
