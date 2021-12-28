@@ -1,17 +1,17 @@
 
 
-### Airdropping
+# Airdropping
 
 - Holders of a Ronin Cat NFT will receive 70 $HONOUR every week for 10 years
 
 
-### Breeding
+# Breeding
 
 - Burn 600 $HONOUR to receive a “Ronin Kitten”
 - Must be holding 2 Ronin Cat NFT’s
 - Only 500 total circulating supply of “Ronin Kittens”
 
-# Deployment instructions
+## Deployment instructions
 
 - Ensure all 5 contracts are in the same directory.
 - Deploy RoninCats
